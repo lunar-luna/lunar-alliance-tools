@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071630">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Lunar Alliance Tools</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--navy:#071630;--navy2:#0c2850;--blue:#1b63c8;--blue2:#2e8cff;--gold:#efc86b;--ink:#172036;--muted:#6d7891;--paper:#fff;--bg:#edf3fb;--line:#d8e2f1;--good:#17845a;--warn:#c57619;--bad:#b83c51;--shadow:0 12px 32px rgba(8,30,67,.12);--r:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;color:var(--ink);background:linear-gradient(#eaf1fb,#f8fbff);min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.appbar{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--navy),#0d2c59);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;box-shadow:0 4px 20px rgba(0,0,0,.22)}
+.brand{display:flex;align-items:center;gap:11px;max-width:920px;margin:auto}.moon{width:38px;height:38px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px rgba(239,200,107,.45);position:relative;flex:0 0 auto}.moon:after{content:"";position:absolute;width:34px;height:34px;left:11px;top:-2px;border-radius:50%;background:#0a2144}.brand h1{font-family:Georgia,serif;font-size:20px;margin:0;color:#fff5cf;letter-spacing:.02em}.brand small{display:block;color:#cbd8ef;font-size:11px;margin-top:2px}.back{display:none;border:0;background:rgba(255,255,255,.12);color:white;border-radius:10px;padding:8px 10px;margin-right:2px}
+main{max-width:920px;margin:auto;padding:14px 12px calc(88px + env(safe-area-inset-bottom))}.page{display:none}.page.active{display:block}.hero{background:radial-gradient(circle at 78% 0,#2c5c9c 0,transparent 34%),linear-gradient(145deg,var(--navy),var(--navy2));border-radius:24px;color:white;padding:24px 20px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"✦  ·  ✧  ·  ✦";position:absolute;right:18px;top:14px;color:#ffe49b;letter-spacing:8px;opacity:.8}.hero h2{font-family:Georgia,serif;color:#fff0b5;font-size:28px;margin:0 0 8px}.hero p{margin:0;color:#dbe7fa;font-size:13px}.today-card{background:rgba(255,255,255,.94);color:var(--ink);margin-top:18px;border-radius:16px;padding:14px}.today-card strong{font-size:14px}.today-lines{margin-top:8px;font-size:13px;line-height:1.65;color:#3d4963}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.menu-card{border:1px solid #dce5f4;background:white;border-radius:18px;padding:16px 14px;text-align:left;box-shadow:var(--shadow);min-height:112px;transition:.15s}.menu-card:active{transform:scale(.985)}.menu-card .ico{font-size:27px}.menu-card b{display:block;margin:8px 0 4px;font-size:15px}.menu-card small{color:var(--muted);font-size:11px;line-height:1.35}.menu-card.admin{grid-column:1/-1;min-height:auto;display:flex;align-items:center;gap:12px}.menu-card.admin .ico{font-size:24px}.menu-card.admin b{margin:0 0 2px}
+.card{background:var(--paper);border:1px solid rgba(216,226,241,.95);border-radius:var(--r);padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}.card h2{font-size:17px;margin:0 0 12px}.card h3{font-size:14px;margin:16px 0 8px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.badge{background:#e9f1ff;color:#1a5cb4;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700}
+label{display:block;font-size:12px;font-weight:800;color:#3c4860;margin:10px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:white;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,99,200,.12)}textarea{min-height:170px;resize:vertical;line-height:1.55}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.weekdays input{display:none}.weekdays label{margin:0;text-align:center;padding:10px 0;border:1px solid var(--line);border-radius:10px;background:white;color:#4d5870}.weekdays input:checked+label{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-color:transparent}
+.events{display:grid;grid-template-columns:1fr 1fr;gap:8px}.event-check{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fbfdff;min-height:48px}.event-check input{width:20px;height:20px;accent-color:var(--blue);flex:0 0 auto}.event-check label{margin:0;font-size:12px;line-height:1.3}.event-detail{display:none;border-top:1px dashed var(--line);margin-top:12px;padding-top:4px}.event-detail.show{display:block}.hint{font-size:11px;color:var(--muted);margin-top:5px}
+.preview{white-space:pre-wrap;background:#f8fbff;border:1px solid var(--line);border-radius:14px;padding:14px;min-height:220px;line-height:1.65;font-size:13px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.btn{border:0;border-radius:13px;padding:13px 12px;font-weight:800}.primary{background:linear-gradient(135deg,var(--blue),#704fc4);color:white}.secondary{background:#edf3fc;color:#264d84}.danger{background:#fff0f3;color:var(--bad);border:1px solid #ffd3dc}.full{width:100%}.metric{background:#f8fbff;border:1px solid var(--line);border-radius:14px;padding:13px}.metric small{color:var(--muted);display:block}.metric strong{font-size:18px;display:block;margin-top:5px;color:#173e78}.result-box{background:linear-gradient(135deg,#fff8da,#fffdf4);border:1px solid #eedb8e;border-radius:16px;padding:16px;text-align:center}.result-box small{color:#77632b}.result-box strong{display:block;font-size:20px;margin:6px 0;color:#5c4712}.material-row{display:grid;grid-template-columns:1.35fr .8fr .8fr;gap:7px;align-items:end;margin-bottom:8px}.material-status{font-size:11px;margin-top:3px}.ok{color:var(--good)}.ng{color:var(--bad)}
+.event-list .item{display:grid;grid-template-columns:74px 1fr;gap:9px;padding:12px 2px;border-bottom:1px solid var(--line)}.event-list .item:last-child{border-bottom:0}.event-list time{font-weight:800;color:#174c91}.event-list b{font-size:13px}.event-list small{color:var(--muted);display:block;margin-top:3px}.rules-table{width:100%;border-collapse:collapse;font-size:12px}.rules-table th,.rules-table td{padding:10px 6px;border-bottom:1px solid var(--line);text-align:left}.rules-table th{color:var(--muted)}
+.lock-panel{text-align:center;padding:22px 8px}.lock-panel .lock{font-size:34px}.maintenance-nav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:13px}.maintenance-nav button{border:1px solid var(--line);background:white;border-radius:12px;padding:10px;font-weight:700}.maintenance-nav button.active{background:var(--navy2);color:white}.maint-pane{display:none}.maint-pane.active{display:block}.notice{font-size:11px;color:var(--muted);line-height:1.5}.sunday-note{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff7dc;border:1px solid #f0d98c;color:#6d5514;font-size:12px;font-weight:700}.sunday-note.show{display:block}.maint-row{display:flex;gap:8px;align-items:center}.maint-row>*{flex:1}.mini-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.field-checks{display:flex;gap:12px;flex-wrap:wrap;padding:8px 0}.field-checks label{margin:0;font-weight:600}.field-checks input{width:auto;margin-right:4px}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:#101d35;color:white;padding:11px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.22s;z-index:100;box-shadow:0 10px 30px rgba(0,0,0,.25)}.toast.show{opacity:1;transform:translate(-50%,0)}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr)}.bottom-nav button{border:0;background:transparent;color:#60708b;font-size:10px;font-weight:700;padding:4px}.bottom-nav span{display:block;font-size:20px;margin-bottom:2px}.bottom-nav button.active{color:var(--blue)}
+@media(min-width:700px){.menu-grid{grid-template-columns:repeat(3,1fr)}.menu-card.admin{grid-column:auto;display:block;min-height:112px}.menu-card.admin .ico{font-size:27px}.menu-card.admin b{margin:8px 0 4px}.bottom-nav{max-width:920px;left:50%;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0}.events{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:460px){main{padding-left:10px;padding-right:10px}.card{padding:14px}.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.events{gap:7px}.event-check{padding:9px 8px}.material-row{grid-template-columns:1.1fr .75fr .75fr}.hero h2{font-size:24px}}
+</style>
+</head>
+<body>
+<header class="appbar"><div class="brand"><button id="backBtn" class="back">‹</button><div class="moon"></div><div><h1 id="appTitle">Lunar Alliance Tools</h1><small id="appSubtitle">連盟活動を、もっと便利に。</small></div></div></header>
+<main>
+<section id="home" class="page active">
+ <div class="hero"><h2>Lunar Alliance Tools</h2><p>お知らせ作成と個人用耐性計算を、ひとつに。</p><div class="today-card"><strong id="todayLabel"></strong><div id="todaySummary" class="today-lines"></div></div></div>
+ <div class="menu-grid">
+  <button class="menu-card" data-go="notice"><span class="ico">📣</span><b>お知らせ作成</b><small>毎日の連盟案内を自動生成・コピー</small></button>
+  <button class="menu-card" data-go="resistance"><span class="ico">🛡️</span><b>耐性計算</b><small>完了日時・素材不足を自分専用で計算</small></button>
+  <button class="menu-card" data-go="events"><span class="ico">📅</span><b>イベント一覧</b><small>登録済みイベントの時刻を確認</small></button>
+  <button class="menu-card" data-go="train"><span class="ico">🚆</span><b>車掌・VIP</b><small>曜日ごとの選出ルールを確認</small></button>
+  <button class="menu-card" data-go="guide"><span class="ico">📖</span><b>連盟ガイド</b><small>連盟内で共有するルール・案内</small></button>
+  <button class="menu-card admin" data-go="maintenance"><span class="ico">⚙️</span><div><b>メンテナンス</b><small>幹部用：テンプレートと設定の編集</small></div></button>
+ </div>
+</section>
+
+<section id="notice" class="page">
+ <div class="card"><div class="section-title"><h2>本日のイベント</h2><span class="badge">複数選択可</span></div><div id="eventChecks" class="events"></div><div id="eventDetails"></div></div>
+ <div class="card"><h2>基本情報</h2><label>日付（mmdd）</label><input id="noticeDate" maxlength="4" inputmode="numeric" placeholder="0723"><label>曜日</label><div id="noticeWeekdays" class="weekdays"></div><div id="trainNameInputs" class="grid2"><div><label>車掌名（敬称略）</label><input id="conductor"><div id="conductorHint" class="hint"></div></div><div><label>VIP名（敬称略）</label><input id="vip"><div id="vipHint" class="hint"></div></div></div><div id="sundayDiceNote" class="sunday-note">🎲 日曜日は車掌・VIP名の入力不要です。<br>「車掌・VIP：全員参加のサイコロ🎲大会」と自動表示します。</div></div>
+ <div class="card"><h2>出力結果</h2><div id="noticePreview" class="preview"></div><div class="actions"><button id="copyNotice" class="btn primary">テキストをコピー</button><button id="clearNotice" class="btn secondary">入力をクリア</button></div></div>
+</section>
+
+<section id="resistance" class="page">
+ <div class="card"><div class="section-title"><h2>耐性・完了日時計算</h2><span class="badge">個人用</span></div><div class="grid2"><div><label>現在の耐性レベル</label><input id="resCurrent" type="number" min="0" value="0"></div><div><label>目標耐性レベル</label><input id="resTarget" type="number" min="0" value="0"></div></div><label>研究開始日時</label><input id="resStart" type="datetime-local"><div class="grid3"><div><label>基本所要日数</label><input id="resDays" type="number" min="0" value="0"></div><div><label>時間</label><input id="resHours" type="number" min="0" max="23" value="0"></div><div><label>分</label><input id="resMinutes" type="number" min="0" max="59" value="0"></div></div><div class="grid2"><div><label>研究速度ボーナス（%）</label><input id="resSpeed" type="number" min="0" value="0"></div><div><label>使用する加速（分）</label><input id="resBoost" type="number" min="0" value="0"></div></div><button id="calcResistance" class="btn primary full" style="margin-top:13px">計算する</button></div>
+ <div class="card"><h2>計算結果</h2><div class="result-box"><small>完了予定日時</small><strong id="finishAt">—</strong><span id="remainingText">所要時間を入力してください</span></div><div class="grid2" style="margin-top:10px"><div class="metric"><small>レベル</small><strong id="levelResult">0 → 0</strong></div><div class="metric"><small>速度反映後</small><strong id="durationResult">0分</strong></div></div></div>
+ <div class="card"><div class="section-title"><h2>必要素材</h2><span class="badge">端末に保存</span></div><p class="notice">素材名・必要数・所持数を自由に入力できます。各連盟員のデータは、その人の端末にだけ保存されます。</p><div id="materialRows"></div><button id="addMaterial" class="btn secondary full">＋ 素材を追加</button></div>
+</section>
+
+<section id="events" class="page"><div class="card"><h2>イベント一覧</h2><p class="notice">現在登録されているイベントテンプレートから時刻を表示しています。</p><div id="eventTimeList" class="event-list"></div></div></section>
+<section id="train" class="page"><div class="card"><h2>曜日別 車掌・VIPルール</h2><table class="rules-table"><thead><tr><th>曜日</th><th>車掌</th><th>VIP</th></tr></thead><tbody id="trainRules"></tbody></table></div></section>
+<section id="guide" class="page"><div class="card"><h2>連盟ガイド</h2><div id="guideText" class="preview"></div></div></section>
+
+<section id="maintenance" class="page">
+ <div id="lockPanel" class="card lock-panel"><div class="lock">🔒</div><h2>メンテナンス画面</h2><p class="notice">初回は好きな4桁以上の暗証番号を設定してください。これは誤操作防止用で、強固なセキュリティではありません。</p><input id="adminPin" type="password" inputmode="numeric" placeholder="暗証番号"><button id="unlockAdmin" class="btn primary full" style="margin-top:10px">開く／初回設定</button></div>
+ <div id="adminArea" class="hidden"><div class="maintenance-nav"><button class="active" data-pane="dayPane">曜日</button><button data-pane="eventPane">イベント</button><button data-pane="trainPane">列車</button><button data-pane="guidePane">ガイド</button><button data-pane="dataPane">データ</button></div>
+  <div id="dayPane" class="maint-pane active"><div class="card"><h2>曜日テンプレート</h2><label>曜日</label><select id="maintDay"></select><label>連対＋準備の本文</label><textarea id="maintDayText"></textarea><div class="grid2"><div><label>車掌の理由</label><input id="maintConductor"></div><div><label>VIPの理由</label><input id="maintVip"></div></div><p class="notice">※日曜日は、お知らせ作成時に車掌・VIP名を入力せず「全員参加のサイコロ🎲大会」を自動表示します。</p><button id="saveDay" class="btn primary full" style="margin-top:12px">保存</button></div></div>
+  <div id="eventPane" class="maint-pane"><div class="card"><div class="section-title"><h2>イベント管理</h2><span class="badge">追加・削除OK</span></div><label>イベント</label><div class="maint-row"><select id="maintEvent"></select><button id="newEvent" class="btn secondary" type="button">＋追加</button></div><label>イベント名</label><input id="maintEventName"><label>開催時間（JST）</label><input id="maintEventTimes" placeholder="例：21:30　／ 複数なら 11:10, 23:30"><p class="notice">JSTだけ入力すると、本文中のJST／MYT／WIB時刻を自動で更新します。複数時刻は「,」区切り。</p><label>追加入力項目</label><div class="field-checks"><label><input type="checkbox" id="fieldLevel">レベル</label><label><input type="checkbox" id="fieldServer">対戦サーバー</label><label><input type="checkbox" id="fieldNote">備考</label></div><label>本文テンプレート</label><textarea id="maintEventText"></textarea><p class="notice">{{level}}、{{server}}、{{note}} を入力値に置換できます。</p><div class="mini-actions"><button id="saveEvent" class="btn primary">保存</button><button id="deleteEvent" class="btn danger">削除</button></div></div></div>
+  <div id="trainPane" class="maint-pane"><div class="card"><h2>列車設定</h2><label>見出し</label><input id="maintTrainTitle" placeholder="★本日の列車★"><label>車掌指名時刻（JST）</label><input id="maintTrainTime" type="time"><p class="notice">MYTはJST−1時間、WIBはJST−2時間で自動表示します。</p><label>追加案内（任意）</label><textarea id="maintTrainExtra" style="min-height:110px" placeholder="列車について毎日表示したい補足があれば入力"></textarea><button id="saveTrain" class="btn primary full" style="margin-top:12px">保存</button></div></div>
+  <div id="guidePane" class="maint-pane"><div class="card"><h2>連盟ガイド編集</h2><textarea id="maintGuide"></textarea><button id="saveGuide" class="btn primary full" style="margin-top:12px">保存</button></div></div>
+  <div id="dataPane" class="maint-pane"><div class="card"><h2>バックアップ・復元</h2><div class="actions"><button id="exportData" class="btn secondary">書き出す</button><button id="importDataBtn" class="btn secondary">読み込む</button></div><input id="importData" type="file" accept="application/json" hidden><button id="resetAll" class="btn danger full" style="margin-top:10px">初期設定に戻す</button><button id="changePin" class="btn secondary full" style="margin-top:10px">暗証番号を変更</button></div></div>
+ </div>
+</section>
+</main>
+<nav class="bottom-nav"><button class="active" data-go="home"><span>⌂</span>ホーム</button><button data-go="notice"><span>✎</span>作成</button><button data-go="resistance"><span>🛡</span>耐性</button><button data-go="events"><span>▦</span>イベント</button></nav>
+<div id="toast" class="toast"></div>
+<script>
+const DAYS=["月","火","水","木","金","土","日"],STORE="lunarAllianceToolsV1",PIN_KEY="lunarAlliancePin";
+const defaults={train:{title:"★本日の列車★",time:"20:30",extra:""},trainTime:"★本日の列車★\n　車掌指名 20:30JST（19:30MYT、18:30WIB）",reasons:{月:{conductor:"連盟対決MVP1位",vip:"連盟対決MVP2位"},火:{conductor:"連盟対決1位",vip:"連盟対決4位"},水:{conductor:"アウォーズデー（Awards day）",vip:"アウォーズデー（Awards day）"},木:{conductor:"連盟対決2位",vip:"連盟対決5位"},金:{conductor:"寄付ランキング1位",vip:"寄付ランキング2位"},土:{conductor:"連盟対決3位",vip:"連盟対決6位"},日:{conductor:"全員参加サイコロ大会",vip:"全員参加サイコロ大会"}},
+weekdays:{月:`【月曜日の連対 11:00JST～】
+①APの消費　※軍拡
+②レーダークエスト　クリア＆回収
+③英雄レベルアップ　※軍拡
+④ドローンレベルアップ　※軍拡
+⑤食料、鋼材、金貨の採集（レーダークエスト除く）
+⑥チップ宝箱の開封
+⑦英雄ランクアップ（英雄欠片消費）
+
+★明日以降のための準備（やってはダメなこと）★
+・星付き任務（火曜）
+・ドローン部品宝箱の開封（水曜）
+・英雄欠片、スキル強化、英雄ガチャの過度な消費（木曜）
+・建造の過度な加速、開封（火曜）
+・科学の過度な加速（水曜）
+・兵士の過度な加速（金曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）`,火:`【火曜日の連対 11:00JST～】
+①建造加速、完成、開封　※軍拡
+②URトラック発車　☆星付き任務を出す！
+③UR極秘任務出発
+④生存者募集
+
+★明日以降のための準備（やっちゃダメなこと）★
+・レーダークエストの過度な回収（水曜）
+・ドローンの過度なレベルアップ（月曜）
+・ドローン部品宝箱の開封（水曜）
+・チップ宝箱の開封（月曜）
+・英雄欠片、スキル強化、英雄ガチャの過度な消費（木曜）
+・科学の過度な加速（水曜）
+・兵士の過度な加速（金曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）`,水:`【水曜日の連対 11:00JST～】
+①科学研究の加速、完成開封　※軍拡
+②知恵の勲章を1枚消費
+　科学研究の連盟対決／基地間輸送／特別部隊で使います。
+③レーダークエスト　クリア＆回収
+④ドローン部品宝箱開封
+
+☆星付き任務があれば出してOK！
+　→今日、☆星付きが出現してる場合は、次は土曜日に出るので大丈夫！
+
+★連対のためにストック（やっちゃダメなこと）★
+・ドローンの過度なレベルアップ（月曜）
+・チップ宝箱の開封（月曜）
+・建造の過度な加速（金曜）
+・英雄欠片、スキル強化、英雄ガチャの過度な消費（木曜）
+・兵士の過度な加速（金曜）
+・生存者ガチャの過度な消費（火曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）`,木:`【木曜日の連対 11:00JST～】
+①英雄募集、レベルアップ ※軍拡
+②英雄ガチャ　※軍拡
+③英雄ランクアップ（英雄欠片消費）
+④英雄スキルアップ（スキルメダル消費）
+
+★明日以降のための準備（やっちゃダメなこと）★
+・星付き任務（土曜）
+・レーダークエストの過度な回収（金曜）
+・ドローンの過度なレベルアップ（月曜）
+・ドローン部品宝箱の開封（水曜）
+・チップ宝箱の開封（月曜）
+・建造／科学／兵士の過度な加速（金曜）
+・生存者ガチャの過度な消費（火曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）`,金:`【金曜日の連対 11:00JST～】
+①レーダークエスト　クリア＆回収
+②建造加速、完成開封　※軍拡
+③科学研究の加速、完成開封　※軍拡
+④兵士訓練＆加速※ランクアップ推奨　※軍拡
+⑤ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの消費
+
+★明日以降のための準備（やっちゃダメなこと）★
+・星付き任務（土曜）
+・ドローンの過度なレベルアップ（月曜）
+・ドローン部品宝箱の開封（水曜）
+・チップ宝箱の開封（月曜）
+・生存者ガチャの過度な消費（火曜）
+・英雄ガチャ/英雄の欠片/スキルメダルの過度な消費（木曜）`,土:`【土曜の連盟対決】11:00JST（10:00MYT、9:00WIB）〜
+①URトラック発車　☆星付き任務を出す！
+②UR極秘任務出発
+③建造の加速※軍拡
+④科学の加速※軍拡
+⑤兵士訓練の加速※軍拡
+⑥兵士治療の加速
+⑦相手連盟の兵士撃破（連盟対決での奇襲、戦域対決の戦いなど）
+
+★連対のためにストック（やっちゃダメなこと）★
+・レーダークエストの過度な回収（月曜）
+・ドローン部品宝箱の開封（水曜）
+・ドローンの過度なレベルアップ（月曜）
+・チップ宝箱の開封（月曜）
+・英雄欠片、スキル強化、英雄ガチャの過度な消費（木曜）
+・生存者ガチャの過度な消費（火曜）
+・建造の過度な開封（火曜）
+・科学の過度な完了（水曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）`,日:`【日曜日】11:00JST（10:00MYT、9:00WIB）〜
+連盟対決はお休みです。
+月曜日からの連盟対決、頑張りましょう(^^)
+今日寝る前、もしくは明日の朝、11時を越えるように採取に出しましょう！
+
+★明日以降のための準備（やっちゃダメなこと）★
+・星付き任務（火曜）
+・ドローンの過度なレベルアップ（月曜）
+・チップ宝箱の開封（月曜）
+・ドローン部品宝箱の開封（水曜）
+・英雄欠片、スキル強化、英雄ガチャの過度な消費（木曜）
+・建造の過度な加速、開封（火曜）
+・科学の過度な加速（水曜）
+・兵士の過度な加速（金曜）
+・ドミネーターのかけら/訓練ノート/訓練証明書/連携の証/スキルメダルの過度な消費（金曜）
+
+【リセット前チェック】〜月曜日10:59
+☆各種イベントの受取りや購入
+①採掘出してない人は11時過ぎに合わせて出しておきましょう（月曜連対ポイント）
+②連盟／遠征交換所のお買い物（ポイントは持ち越し可能なので無理して使い切る必要はなし）
+③終末の足音／暴走ボスの報酬受取り
+④前線突破の報酬受取り
+⑤前線突破のランキングいいね♡でのダイヤ受取り
+⑥アリーナのランキングいいね♡でのダイヤ受取り`},
+events:[{id:"barrier",name:"バリア",times:["11:00"],fields:[],text:`☆バリア　11:00JST（10:00MYT、9:00WIB）〜
+　連対奇襲や隕鉄争奪戦、戦域対決に参加しない場合はバリアを忘れずに！
+　★汚染区域内参加→12時間バリア！
+　★汚染区域外バリアで参加→24時間バリア！
+　★連対ポイント目当て以外の採取はお控えください。`},{id:"season",name:"シーズン攻略",times:[],fields:[],text:`☆シーズン攻略☆
+　※別途、お知らせ／連盟チャットをご覧ください`},{id:"warzone",name:"戦域対決",times:["23:00"],fields:["server"],text:`☆戦域対決☆ VS #{{server}}
+　23:00JST（22:00MYT、21:00WIB）
+　※担当などが決まり次第、別途お知らせします`},{id:"meteor",name:"隕鉄争奪戦",times:["11:10","23:30"],fields:[],text:`☆隕鉄争奪戦☆各30分
+　11:10JST（10:10MYT、9:10WIB）
+　23:30JST（22:30MYT、21:30WIB）`},{id:"desertA",name:"砂漠の戦場 A",times:["20:00"],fields:[],text:`★砂漠の戦場★Aチーム
+　20:00JST（19:00MYT、18:00WIB）`},{id:"desertB",name:"砂漠の戦場 B",times:["10:00"],fields:[],text:`★砂漠の戦場★Bチーム
+　10:00JST（9:00MYT、8:00WIB）`},{id:"exercise",name:"軍事演習",times:["21:00"],fields:["level"],text:`★軍事演習★ レベル{{level}}
+　21:00JST（20:00MYT、19:00WIB）`},{id:"zombie",name:"ゾンビ侵攻",times:["21:30"],fields:["level","note"],text:`★ゾンビ侵攻（ワラワラ）★ レベル{{level}}
+　21:30JST（20:30MYT、19:30WIB）
+　※{{note}}`},{id:"shark",name:"シャークマウス号",times:["21:30"],fields:[],text:`★シャークマウス号（連盟試練）★
+　21:30JST（20:30MYT、19:30WIB）`},{id:"aisla",name:"アイスラ討伐",times:["21:30"],fields:[],text:`★アイスラ討伐（ゾンビ襲来）★
+　21:30JST（20:30MYT、19:30WIB）`}],guide:`【連盟ツールについて】
+・お知らせ作成は幹部向けです。
+・耐性計算の入力内容は、各自の端末にだけ保存されます。
+・イベント時間や連盟ルールに変更がある場合は、幹部のお知らせを優先してください。
+
+【基本マナー】
+・連盟のお知らせ／連盟チャットを確認しましょう。
+・イベント参加時は担当者の案内に従ってください。
+・分からないことは連盟チャットで確認してください。`,materials:[{name:"耐性素材Ⅰ",need:0,have:0},{name:"耐性素材Ⅱ",need:0,have:0},{name:"耐性素材Ⅲ",need:0,have:0}]};
+let data=load(),noticeState={day:jpDay(),selected:new Set(),fields:{}};
+function deep(o){return JSON.parse(JSON.stringify(o))}
+function parseTimesFromText(text){return [...String(text||'').matchAll(/(\d{1,2}:\d{2})JST/g)].map(m=>m[1])}
+function normalizeData(d){d.train=d.train||deep(defaults.train);if(!d.train.time){const m=String(d.trainTime||'').match(/(\d{1,2}:\d{2})JST/);d.train.time=m?m[1]:'20:30'}if(!d.train.title)d.train.title=(String(d.trainTime||'').split('\n')[0]||'★本日の列車★');if(d.train.extra==null)d.train.extra='';d.events=(d.events||deep(defaults.events)).map((e,i)=>({id:e.id||('event'+Date.now()+i),name:e.name||'イベント',times:Array.isArray(e.times)?e.times:parseTimesFromText(e.text),fields:Array.isArray(e.fields)?e.fields:[],text:e.text||`★${e.name||'イベント'}★`}));return d}
+function load(){try{const saved=JSON.parse(localStorage.getItem(STORE)||"null");return normalizeData(saved?Object.assign(deep(defaults),saved):deep(defaults))}catch{return normalizeData(deep(defaults))}}
+function save(){localStorage.setItem(STORE,JSON.stringify(data))}function $(id){return document.getElementById(id)}function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
+function jpDay(d=new Date()){return DAYS[(d.getDay()+6)%7]}function mmdd(d=new Date()){return String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")}function dtLocal(d=new Date()){const z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
+function shiftTime(t,delta){if(!/^\d{1,2}:\d{2}$/.test(t||''))return t;let [h,m]=t.split(':').map(Number);h=(h+delta+24)%24;return `${h}:${String(m).padStart(2,'0')}`}
+function timeLine(t,suffix=''){return `${t}JST（${shiftTime(t,-1)}MYT、${shiftTime(t,-2)}WIB）${suffix}`}
+function replaceEventTimes(text,times){let i=0;return String(text||'').split('\n').map(line=>{if(/\d{1,2}:\d{2}JST/.test(line)&&i<times.length){const indent=(line.match(/^\s*/)||[''])[0],suffix=/〜\s*$/.test(line)?'〜':'';return indent+timeLine(times[i++],suffix)}return line}).join('\n')}
+function buildTrainBase(){const t=data.train||defaults.train;const lines=[t.title||'★本日の列車★'];if(t.time)lines.push(`　車掌指名 ${timeLine(t.time)}`);if((t.extra||'').trim())lines.push(t.extra.trim());return lines}
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));$('backBtn').style.display=id==='home'?'none':'block';$('appSubtitle').textContent=id==='home'?'連盟活動を、もっと便利に。':({notice:'お知らせ作成',resistance:'耐性計算',events:'イベント一覧',train:'車掌・VIP',guide:'連盟ガイド',maintenance:'メンテナンス'}[id]||'');scrollTo(0,0);if(id==='home')renderHome();if(id==='events')renderEventTimes();if(id==='train')renderTrain();if(id==='guide')$('guideText').textContent=data.guide}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$('backBtn').onclick=()=>go('home');
+function renderHome(){const now=new Date();$('todayLabel').textContent=`📅 ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}（${jpDay(now)}）`;$('todaySummary').innerHTML=`${esc((data.train&&data.train.time)||'20:30')}　車掌指名<br>今日の連対：${jpDay(now)}曜日テンプレート<br><span style="color:#66748f">詳しい予定は「イベント一覧」または「お知らせ作成」で確認</span>`}
+function renderNoticeWeekdays(){const r=$('noticeWeekdays');r.innerHTML='';DAYS.forEach(d=>r.insertAdjacentHTML('beforeend',`<input type="radio" name="nd" id="nd${d}" value="${d}" ${d===noticeState.day?'checked':''}><label for="nd${d}">${d}</label>`));r.querySelectorAll('input').forEach(x=>x.onchange=()=>{noticeState.day=x.value;updateNoticeHints();updateSundayUI();updateNotice()})}
+function renderNoticeEvents(){const c=$('eventChecks'),details=$('eventDetails');c.innerHTML='';details.innerHTML='';data.events.forEach(e=>{c.insertAdjacentHTML('beforeend',`<div class="event-check"><input type="checkbox" id="ev${e.id}" data-id="${e.id}"><label for="ev${e.id}">${e.name}</label></div>`);if(e.fields.length){let h=`<div id="detail${e.id}" class="event-detail"><h3>${e.name}</h3>`;e.fields.forEach(f=>{const l=f==='level'?'レベル':f==='server'?'対戦サーバー番号':'備考',p=f==='level'?'12':f==='server'?'1738':'ポイントが貯まったら';h+=`<label>${l}</label><input data-event="${e.id}" data-field="${f}" placeholder="${p}">`});details.insertAdjacentHTML('beforeend',h+'</div>')}});c.querySelectorAll('input').forEach(x=>x.onchange=()=>{x.checked?noticeState.selected.add(x.dataset.id):noticeState.selected.delete(x.dataset.id);$('detail'+x.dataset.id)?.classList.toggle('show',x.checked);updateNotice()});details.querySelectorAll('input').forEach(x=>x.oninput=()=>{noticeState.fields[x.dataset.event]??={};noticeState.fields[x.dataset.event][x.dataset.field]=x.value;updateNotice()})}
+function updateNoticeHints(){const r=data.reasons[noticeState.day]||{conductor:'',vip:''};$('conductorHint').textContent=r.conductor;$('vipHint').textContent=r.vip}
+function updateSundayUI(){const sun=noticeState.day==='日';$('trainNameInputs').classList.toggle('hidden',sun);$('sundayDiceNote').classList.toggle('show',sun)}
+function fill(t,v={}){return t.replace(/{{(\w+)}}/g,(_,k)=>v[k]??'').split('\n').filter(l=>!/^\s*※\s*$/.test(l)).join('\n')}
+function buildNotice(){const parts=[`【本日の予定】${$('noticeDate').value.trim()}`];data.events.forEach(e=>{if(noticeState.selected.has(e.id)){const timed=replaceEventTimes(e.text,e.times||[]);parts.push(fill(timed,noticeState.fields[e.id]||{}))}});const train=buildTrainBase(),r=data.reasons[noticeState.day]||{conductor:'',vip:''};if(noticeState.day==='日'){train.push('　車掌・VIP：全員参加のサイコロ🎲大会')}else{const c=$('conductor').value.trim(),v=$('vip').value.trim();if(c)train.push(`　車掌：${c}さん（${r.conductor}）`);if(v)train.push(`　VIP ：${v}さん（${r.vip}）`)}parts.push(train.join('\n'));parts.push(data.weekdays[noticeState.day]);return parts.join('\n\n')}function updateNotice(){$('noticePreview').textContent=buildNotice()}
+['noticeDate','conductor','vip'].forEach(id=>$(id).oninput=updateNotice);$('copyNotice').onclick=async()=>{try{await navigator.clipboard.writeText(buildNotice())}catch{const t=document.createElement('textarea');t.value=buildNotice();document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('コピーしました')};$('clearNotice').onclick=()=>{$('conductor').value='';$('vip').value='';noticeState.selected.clear();noticeState.fields={};renderNoticeEvents();updateNotice();toast('入力をクリアしました')};
+function calcResistance(){const start=new Date($('resStart').value||Date.now()),base=(+$('resDays').value*1440)+(+ $('resHours').value*60)+(+ $('resMinutes').value),speed=Math.max(0,+$('resSpeed').value),boost=Math.max(0,+$('resBoost').value),adjusted=Math.max(0,Math.ceil(base/(1+speed/100)-boost)),finish=new Date(start.getTime()+adjusted*60000);$('finishAt').textContent=finish.toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short'});$('remainingText').textContent=`残り ${Math.floor(adjusted/1440)}日 ${Math.floor((adjusted%1440)/60)}時間 ${adjusted%60}分`;$('durationResult').textContent=`${adjusted.toLocaleString()}分`;$('levelResult').textContent=`${$('resCurrent').value||0} → ${$('resTarget').value||0}`;saveResistanceInputs()}$('calcResistance').onclick=calcResistance;
+function saveResistanceInputs(){data.resistance={current:$('resCurrent').value,target:$('resTarget').value,start:$('resStart').value,days:$('resDays').value,hours:$('resHours').value,minutes:$('resMinutes').value,speed:$('resSpeed').value,boost:$('resBoost').value};save()}function loadResistanceInputs(){const r=data.resistance||{};$('resCurrent').value=r.current??0;$('resTarget').value=r.target??0;$('resStart').value=r.start||dtLocal();$('resDays').value=r.days??0;$('resHours').value=r.hours??0;$('resMinutes').value=r.minutes??0;$('resSpeed').value=r.speed??0;$('resBoost').value=r.boost??0}
+function renderMaterials(){const w=$('materialRows');w.innerHTML='';data.materials.forEach((m,i)=>{w.insertAdjacentHTML('beforeend',`<div class="material-row"><div><label>素材名</label><input data-mi="${i}" data-k="name" value="${esc(m.name)}"><div id="ms${i}" class="material-status"></div></div><div><label>必要数</label><input type="number" min="0" data-mi="${i}" data-k="need" value="${m.need}"></div><div><label>所持数</label><input type="number" min="0" data-mi="${i}" data-k="have" value="${m.have}"></div></div>`)});w.querySelectorAll('input').forEach(x=>x.oninput=()=>{const i=+x.dataset.mi,k=x.dataset.k;data.materials[i][k]=k==='name'?x.value:+x.value;save();updateMaterialStatus(i)});data.materials.forEach((_,i)=>updateMaterialStatus(i))}function updateMaterialStatus(i){const m=data.materials[i],d=(+m.have)-(+m.need),s=$('ms'+i);s.textContent=d>=0?`充足（${d.toLocaleString()}余り）`:`不足 ${Math.abs(d).toLocaleString()}`;s.className='material-status '+(d>=0?'ok':'ng')}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}$('addMaterial').onclick=()=>{data.materials.push({name:'新しい素材',need:0,have:0});save();renderMaterials()};
+function renderEventTimes(){const w=$('eventTimeList');w.innerHTML='';data.events.forEach(e=>{const ts=e.times||[],first=ts[0]||'—',desc=ts.length?ts.map(t=>timeLine(t)).join(' / '):'時刻は本文参照';w.insertAdjacentHTML('beforeend',`<div class="item"><time>${esc(first)}</time><div><b>${esc(e.name)}</b><small>${esc(desc)}</small></div></div>`)})}function renderTrain(){$('trainRules').innerHTML=DAYS.map(d=>`<tr><td>${d}</td><td>${esc(data.reasons[d].conductor)}</td><td>${esc(data.reasons[d].vip)}</td></tr>`).join('')}
+let creatingEvent=false;
+function renderMaintenance(){const ds=$('maintDay');ds.innerHTML=DAYS.map(d=>`<option value="${d}">${d}曜日</option>`).join('');refreshMaintEventSelect();loadDayMaint();loadEventMaint();loadTrainMaint();$('maintGuide').value=data.guide}
+function refreshMaintEventSelect(selected){const es=$('maintEvent');es.innerHTML=data.events.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');if(selected&&data.events.some(e=>e.id===selected))es.value=selected}
+function loadDayMaint(){const d=$('maintDay').value||'月';$('maintDayText').value=data.weekdays[d]||'';$('maintConductor').value=(data.reasons[d]||{}).conductor||'';$('maintVip').value=(data.reasons[d]||{}).vip||''}
+function loadEventMaint(){creatingEvent=false;const e=data.events.find(e=>e.id===($('maintEvent').value||data.events[0]?.id));if(!e){$('maintEventName').value='';$('maintEventTimes').value='';$('maintEventText').value='';return}$('maintEventName').value=e.name;$('maintEventTimes').value=(e.times||[]).join(', ');$('maintEventText').value=e.text;$('fieldLevel').checked=e.fields.includes('level');$('fieldServer').checked=e.fields.includes('server');$('fieldNote').checked=e.fields.includes('note')}
+function loadTrainMaint(){const t=data.train||defaults.train;$('maintTrainTitle').value=t.title||'';$('maintTrainTime').value=t.time||'20:30';$('maintTrainExtra').value=t.extra||''}
+$('maintDay').onchange=loadDayMaint;$('maintEvent').onchange=loadEventMaint;
+$('saveDay').onclick=()=>{const d=$('maintDay').value;data.weekdays[d]=$('maintDayText').value;data.reasons[d]={conductor:$('maintConductor').value,vip:$('maintVip').value};save();updateNoticeHints();updateNotice();toast('曜日設定を保存しました')};
+$('newEvent').onclick=()=>{creatingEvent=true;$('maintEventName').value='';$('maintEventTimes').value='';$('maintEventText').value='';$('fieldLevel').checked=$('fieldServer').checked=$('fieldNote').checked=false;$('maintEventName').focus();toast('新しいイベントを入力してください')};
+$('saveEvent').onclick=()=>{const name=$('maintEventName').value.trim();if(!name)return toast('イベント名を入力してください');const times=$('maintEventTimes').value.split(/[,、]/).map(x=>x.trim()).filter(Boolean);if(times.some(t=>!/^\d{1,2}:\d{2}$/.test(t)))return toast('時間は 21:30 の形式で入力してください');const fields=[];if($('fieldLevel').checked)fields.push('level');if($('fieldServer').checked)fields.push('server');if($('fieldNote').checked)fields.push('note');let text=$('maintEventText').value.trim();if(!text){text=`★${name}★`+(times[0]?`\n　${timeLine(times[0])}`:'')}if(creatingEvent){const id='custom'+Date.now();data.events.push({id,name,times,fields,text});creatingEvent=false;refreshMaintEventSelect(id)}else{const e=data.events.find(e=>e.id===$('maintEvent').value);if(!e)return;e.name=name;e.times=times;e.fields=fields;e.text=text;refreshMaintEventSelect(e.id)}save();renderNoticeEvents();renderEventTimes();updateNotice();loadEventMaint();toast('イベント設定を保存しました')};
+$('deleteEvent').onclick=()=>{if(creatingEvent){loadEventMaint();return}const id=$('maintEvent').value,e=data.events.find(x=>x.id===id);if(!e)return;if(!confirm(`「${e.name}」を削除しますか？`))return;data.events=data.events.filter(x=>x.id!==id);noticeState.selected.delete(id);delete noticeState.fields[id];save();refreshMaintEventSelect();renderNoticeEvents();renderEventTimes();loadEventMaint();updateNotice();toast('イベントを削除しました')};
+$('saveTrain').onclick=()=>{data.train={title:$('maintTrainTitle').value.trim()||'★本日の列車★',time:$('maintTrainTime').value||'20:30',extra:$('maintTrainExtra').value};save();updateNotice();renderHome();toast('列車設定を保存しました')};
+$('saveGuide').onclick=()=>{data.guide=$('maintGuide').value;save();toast('ガイドを保存しました')};
+document.querySelectorAll('.maintenance-nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.maintenance-nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.maint-pane').forEach(p=>p.classList.toggle('active',p.id===b.dataset.pane))});
+function unlock(){const p=$('adminPin').value.trim(),old=localStorage.getItem(PIN_KEY);if(!/^\d{4,}$/.test(p))return toast('4桁以上の数字を入力してください');if(!old){localStorage.setItem(PIN_KEY,p);toast('暗証番号を設定しました')}else if(old!==p)return toast('暗証番号が違います');$('lockPanel').classList.add('hidden');$('adminArea').classList.remove('hidden');renderMaintenance()}$('unlockAdmin').onclick=unlock;$('changePin').onclick=()=>{localStorage.removeItem(PIN_KEY);$('adminArea').classList.add('hidden');$('lockPanel').classList.remove('hidden');$('adminPin').value='';toast('新しい暗証番号を設定してください')};
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lunar-alliance-tools-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};$('importDataBtn').onclick=()=>$('importData').click();$('importData').onchange=async e=>{try{data=normalizeData(JSON.parse(await e.target.files[0].text()));save();renderNoticeEvents();renderMaterials();renderMaintenance();updateNoticeHints();updateSundayUI();updateNotice();toast('バックアップを復元しました')}catch{toast('読み込みに失敗しました')}};$('resetAll').onclick=()=>{if(confirm('すべての設定と個人データを初期化しますか？')){data=deep(defaults);save();location.reload()}};
+$('noticeDate').value=mmdd();$('resStart').value=dtLocal();renderHome();renderNoticeWeekdays();renderNoticeEvents();updateNoticeHints();updateSundayUI();updateNotice();loadResistanceInputs();renderMaterials();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+</script>
+</body></html>
