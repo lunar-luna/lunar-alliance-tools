@@ -42,6 +42,7 @@ label{display:block;font-size:12px;font-weight:800;color:#3c4860;margin:10px 0 6
   <button class="menu-card" data-go="resistance"><span class="ico">🛡️</span><b>耐性計算</b><small>完了日時・素材不足を自分専用で計算</small></button>
   <button class="menu-card" data-go="events"><span class="ico">📅</span><b>イベント一覧</b><small>登録済みイベントの時刻を確認</small></button>
   <button class="menu-card" data-go="train"><span class="ico">🚆</span><b>車掌・VIP</b><small>曜日ごとの選出ルールを確認</small></button>
+  <button class="menu-card" data-go="trainplan"><span class="ico">📝</span><b>車掌＆VIP案作成</b><small>ランキングから1週間の担当案を自動作成</small></button>
   <button class="menu-card" data-go="guide"><span class="ico">📖</span><b>連盟ガイド</b><small>連盟内で共有するルール・案内</small></button>
   <button class="menu-card admin" data-go="maintenance"><span class="ico">⚙️</span><div><b>メンテナンス</b><small>幹部用：テンプレートと設定の編集</small></div></button>
  </div>
@@ -61,6 +62,27 @@ label{display:block;font-size:12px;font-weight:800;color:#3c4860;margin:10px 0 6
 
 <section id="events" class="page"><div class="card"><h2>イベント一覧</h2><p class="notice">現在登録されているイベントテンプレートから時刻を表示しています。</p><div id="eventTimeList" class="event-list"></div></div></section>
 <section id="train" class="page"><div class="card"><h2>曜日別 車掌・VIPルール</h2><table class="rules-table"><thead><tr><th>曜日</th><th>車掌</th><th>VIP</th></tr></thead><tbody id="trainRules"></tbody></table></div></section>
+<section id="trainplan" class="page">
+ <div class="card"><div class="section-title"><h2>🚆 車掌＆VIP案作成</h2><span class="badge">週次</span></div>
+  <label>対象週（月曜日）</label><input id="planWeek" type="date">
+  <p class="notice">同じ人は車掌・VIPを合わせて週2回までOK。3回以上になると警告します。</p>
+ </div>
+ <div class="card"><h2>ランキング入力</h2>
+  <h3>連盟スターMVP</h3><div class="grid2"><div><label>1位</label><input id="planMvp1" placeholder="名前（敬称略）"></div><div><label>2位</label><input id="planMvp2" placeholder="名前（敬称略）"></div></div>
+  <h3>連盟対決</h3><div class="grid3">
+   <div><label>1位</label><input id="planVs1"></div><div><label>2位</label><input id="planVs2"></div><div><label>3位</label><input id="planVs3"></div>
+   <div><label>4位</label><input id="planVs4"></div><div><label>5位</label><input id="planVs5"></div><div><label>6位</label><input id="planVs6"></div>
+  </div>
+ </div>
+ <div class="card"><h2>水曜｜Awards day</h2>
+  <div class="grid2"><div><label>車掌</label><input id="planAwardsC" placeholder="名前（敬称略）"><label>理由</label><input id="planAwardsCR" placeholder="例：ゴールデンハンター"></div><div><label>VIP</label><input id="planAwardsV" placeholder="名前（敬称略）"><label>理由</label><input id="planAwardsVR" placeholder="例：演習ダメージ1位"></div></div>
+ </div>
+ <div class="card"><h2>金曜｜シーズン活躍</h2>
+  <div class="grid2"><div><label>1位／車掌</label><input id="planSeason1" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason1R" placeholder="例：領地進行段取り"></div><div><label>2位／VIP</label><input id="planSeason2" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason2R" placeholder="選出理由"></div></div>
+ </div>
+ <div id="planDupWarning" class="card hidden" style="border-color:#f0c36a;background:#fffaf0"></div>
+ <div class="card"><h2>作成結果</h2><div id="planPreview" class="preview"></div><div class="actions"><button id="copyPlan" class="btn primary">テキストをコピー</button><button id="clearPlan" class="btn secondary">入力をクリア</button></div></div>
+</section>
 <section id="guide" class="page"><div class="card"><h2>連盟ガイド</h2><div id="guideText" class="preview"></div></div></section>
 
 <section id="maintenance" class="page">
@@ -226,11 +248,12 @@ function parseTimesFromText(text){return [...String(text||'').matchAll(/(\d{1,2}
 function normalizeData(d){
   d.train=d.train||deep(defaults.train);
   if(!d.train.time){const m=String(d.trainTime||'').match(/(\d{1,2}:\d{2})JST/);d.train.time=m?m[1]:'22:00'}
-  // v4 migration: only the old default 20:30 is migrated to 22:00.
-  // Any other time explicitly chosen by the user is preserved.
-  if(d.train.time==='20:30')d.train.time='22:00';
-  if(typeof d.trainTime==='string'&&d.trainTime.includes('車掌指名 20:30JST')){
-    d.trainTime=d.trainTime.replace('車掌指名 20:30JST（19:30MYT、18:30WIB）','車掌指名 22:00JST（21:00MYT、20:00WIB）').replace('車掌指名 20:30JST','車掌指名 22:00JST');
+  // v5 migration: 22:00 JST is the official default.
+  // Apply once to existing browsers so an older saved train time cannot override it.
+  if(d._trainDefaultVersion!==5){
+    d.train.time='22:00';
+    d.trainTime='★本日の列車★\n　車掌指名 22:00JST（21:00MYT、20:00WIB）';
+    d._trainDefaultVersion=5;
   }
   if(!d.train.title)d.train.title=(String(d.trainTime||'').split('\n')[0]||'★本日の列車★');
   if(d.train.extra==null)d.train.extra='';
@@ -250,7 +273,7 @@ function shiftTime(t,delta){if(!/^\d{1,2}:\d{2}$/.test(t||''))return t;let [h,m]
 function timeLine(t,suffix=''){return `${t}JST（${shiftTime(t,-1)}MYT、${shiftTime(t,-2)}WIB）${suffix}`}
 function replaceEventTimes(text,times){let i=0;return String(text||'').split('\n').map(line=>{if(/\d{1,2}:\d{2}JST/.test(line)&&i<times.length){const indent=(line.match(/^\s*/)||[''])[0],suffix=/〜\s*$/.test(line)?'〜':'';return indent+timeLine(times[i++],suffix)}return line}).join('\n')}
 function buildTrainBase(){const t=data.train||defaults.train;const lines=[t.title||'★本日の列車★'];if(t.time)lines.push(`　車掌指名 ${timeLine(t.time)}`);if((t.extra||'').trim())lines.push(t.extra.trim());return lines}
-function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));$('backBtn').style.display=id==='home'?'none':'block';$('appSubtitle').textContent=id==='home'?'連盟活動を、もっと便利に。':({notice:'お知らせ作成',resistance:'耐性計算',events:'イベント一覧',train:'車掌・VIP',guide:'連盟ガイド',maintenance:'メンテナンス'}[id]||'');scrollTo(0,0);if(id==='home')renderHome();if(id==='events')renderEventTimes();if(id==='train')renderTrain();if(id==='guide')$('guideText').textContent=data.guide}
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));$('backBtn').style.display=id==='home'?'none':'block';$('appSubtitle').textContent=id==='home'?'連盟活動を、もっと便利に。':({notice:'お知らせ作成',resistance:'耐性計算',events:'イベント一覧',train:'車掌・VIP',trainplan:'車掌＆VIP案作成',guide:'連盟ガイド',maintenance:'メンテナンス'}[id]||'');scrollTo(0,0);if(id==='home')renderHome();if(id==='events')renderEventTimes();if(id==='train')renderTrain();if(id==='guide')$('guideText').textContent=data.guide}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$('backBtn').onclick=()=>go('home');
 function renderHome(){const now=new Date();$('todayLabel').textContent=`📅 ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}（${jpDay(now)}）`;$('todaySummary').innerHTML=`${esc((data.train&&data.train.time)||'22:00')}　車掌指名<br>今日の連対：${jpDay(now)}曜日テンプレート<br><span style="color:#66748f">詳しい予定は「イベント一覧」または「お知らせ作成」で確認</span>`}
 function renderNoticeWeekdays(){const r=$('noticeWeekdays');r.innerHTML='';DAYS.forEach(d=>r.insertAdjacentHTML('beforeend',`<input type="radio" name="nd" id="nd${d}" value="${d}" ${d===noticeState.day?'checked':''}><label for="nd${d}">${d}</label>`));r.querySelectorAll('input').forEach(x=>x.onchange=()=>{noticeState.day=x.value;updateNoticeHints();updateSundayUI();updateNotice()})}
@@ -260,6 +283,30 @@ function updateSundayUI(){const sun=noticeState.day==='日';$('trainNameInputs')
 function fill(t,v={}){return t.replace(/{{(\w+)}}/g,(_,k)=>v[k]??'').split('\n').filter(l=>!/^\s*※\s*$/.test(l)).join('\n')}
 function buildNotice(){const parts=[`【本日の予定】${$('noticeDate').value.trim()}`];data.events.forEach(e=>{if(noticeState.selected.has(e.id)){const timed=replaceEventTimes(e.text,e.times||[]);parts.push(fill(timed,noticeState.fields[e.id]||{}))}});const train=buildTrainBase(),r=data.reasons[noticeState.day]||{conductor:'',vip:''};if(noticeState.day==='日'){train.push('　車掌・VIP：全員参加のサイコロ🎲大会')}else{const c=$('conductor').value.trim(),v=$('vip').value.trim();if(c)train.push(`　車掌：${c}さん（${r.conductor}）`);if(v)train.push(`　VIP ：${v}さん（${r.vip}）`)}parts.push(train.join('\n'));parts.push(data.weekdays[noticeState.day]);return parts.join('\n\n')}function updateNotice(){$('noticePreview').textContent=buildNotice()}
 ['noticeDate','conductor','vip'].forEach(id=>$(id).oninput=updateNotice);$('copyNotice').onclick=async()=>{try{await navigator.clipboard.writeText(buildNotice())}catch{const t=document.createElement('textarea');t.value=buildNotice();document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('コピーしました')};$('clearNotice').onclick=()=>{$('conductor').value='';$('vip').value='';noticeState.selected.clear();noticeState.fields={};renderNoticeEvents();updateNotice();toast('入力をクリアしました')};
+
+const PLAN_IDS=['planMvp1','planMvp2','planVs1','planVs2','planVs3','planVs4','planVs5','planVs6','planAwardsC','planAwardsCR','planAwardsV','planAwardsVR','planSeason1','planSeason1R','planSeason2','planSeason2R'];
+function nextMondayISO(){const d=new Date();d.setHours(12,0,0,0);const day=d.getDay();let add=(8-day)%7;if(day===1)add=0;d.setDate(d.getDate()+add);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function planName(id){return ($(id)?.value||'').trim()}
+function withReason(name,reason){if(!name)return '';return `${name}さん${reason?`（${reason}）`:''}`}
+function planDates(){const raw=$('planWeek').value||nextMondayISO();const d=new Date(raw+'T12:00:00');const e=new Date(d);e.setDate(d.getDate()+6);const ymd=x=>`${x.getFullYear()}${String(x.getMonth()+1).padStart(2,'0')}${String(x.getDate()).padStart(2,'0')}`;const md=x=>`${String(x.getMonth()+1).padStart(2,'0')}${String(x.getDate()).padStart(2,'0')}`;return {start:ymd(d),end:md(e)}}
+function planAssignments(){return [
+ {day:'月',role:'車掌',name:planName('planMvp1'),label:'連盟スターMVP1位'},
+ {day:'月',role:'VIP',name:planName('planMvp2'),label:'連盟スターMVP2位'},
+ {day:'火',role:'車掌',name:planName('planVs1'),label:'連盟対決1位'},
+ {day:'火',role:'VIP',name:planName('planVs4'),label:'連盟対決4位'},
+ {day:'水',role:'車掌',name:planName('planAwardsC'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsCR')},
+ {day:'水',role:'VIP',name:planName('planAwardsV'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsVR')},
+ {day:'木',role:'車掌',name:planName('planVs2'),label:'連盟対決2位'},
+ {day:'木',role:'VIP',name:planName('planVs5'),label:'連盟対決5位'},
+ {day:'金',role:'車掌',name:planName('planSeason1'),label:'シーズン活躍1位',reason:planName('planSeason1R')},
+ {day:'金',role:'VIP',name:planName('planSeason2'),label:'シーズン活躍2位',reason:planName('planSeason2R')},
+ {day:'土',role:'車掌',name:planName('planVs3'),label:'連盟対決3位'},
+ {day:'土',role:'VIP',name:planName('planVs6'),label:'連盟対決6位'}
+]}
+function buildTrainPlan(){const a=planAssignments(),{start,end}=planDates();const by=(role,day)=>a.find(x=>x.role===role&&x.day===day);const line=x=>x&&x.name?`${x.day}：${x.label} → ${withReason(x.name,x.reason)}`:`${x.day}：${x.label} → `;const c=['月','火','水','木','金','土'].map(d=>line(by('車掌',d)));c.push('日：全員参加サイコロ🎲大会');const v=['月','火','水','木','金','土'].map(d=>line(by('VIP',d)));v.push('日：全員参加サイコロ🎲大会');return `車掌案${start}-${end}\n【車掌】\n${c.join('\n')}\n【VIP】\n${v.join('\n')}`}
+function updatePlanDup(){const counts={};planAssignments().forEach(x=>{if(x.name)counts[x.name]=(counts[x.name]||0)+1});const over=Object.entries(counts).filter(([,n])=>n>=3).sort((a,b)=>b[1]-a[1]);const w=$('planDupWarning');if(!over.length){w.classList.add('hidden');w.innerHTML='';return}w.classList.remove('hidden');w.innerHTML=`<b style="color:#9a6114">⚠️ 重複チェック</b><div class="notice" style="margin-top:7px;color:#7c5719">${over.map(([n,c])=>`${esc(n)}さん：週${c}回`).join('<br>')}<br>同じ人は週2回までのため、担当を確認してください。</div>`}
+function updateTrainPlan(){if(!$('planPreview'))return;$('planPreview').textContent=buildTrainPlan();updatePlanDup()}
+function initTrainPlan(){if(!$('planWeek'))return;if(!$('planWeek').value)$('planWeek').value=nextMondayISO();PLAN_IDS.forEach(id=>$(id).addEventListener('input',updateTrainPlan));$('planWeek').addEventListener('change',updateTrainPlan);$('copyPlan').onclick=async()=>{const text=buildTrainPlan();try{await navigator.clipboard.writeText(text)}catch{const t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('車掌案をコピーしました')};$('clearPlan').onclick=()=>{PLAN_IDS.forEach(id=>$(id).value='');updateTrainPlan();toast('入力をクリアしました')};updateTrainPlan()}
 function calcResistance(){const start=new Date($('resStart').value||Date.now()),base=(+$('resDays').value*1440)+(+ $('resHours').value*60)+(+ $('resMinutes').value),speed=Math.max(0,+$('resSpeed').value),boost=Math.max(0,+$('resBoost').value),adjusted=Math.max(0,Math.ceil(base/(1+speed/100)-boost)),finish=new Date(start.getTime()+adjusted*60000);$('finishAt').textContent=finish.toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short'});$('remainingText').textContent=`残り ${Math.floor(adjusted/1440)}日 ${Math.floor((adjusted%1440)/60)}時間 ${adjusted%60}分`;$('durationResult').textContent=`${adjusted.toLocaleString()}分`;$('levelResult').textContent=`${$('resCurrent').value||0} → ${$('resTarget').value||0}`;saveResistanceInputs()}$('calcResistance').onclick=calcResistance;
 function saveResistanceInputs(){data.resistance={current:$('resCurrent').value,target:$('resTarget').value,start:$('resStart').value,days:$('resDays').value,hours:$('resHours').value,minutes:$('resMinutes').value,speed:$('resSpeed').value,boost:$('resBoost').value};save()}function loadResistanceInputs(){const r=data.resistance||{};$('resCurrent').value=r.current??0;$('resTarget').value=r.target??0;$('resStart').value=r.start||dtLocal();$('resDays').value=r.days??0;$('resHours').value=r.hours??0;$('resMinutes').value=r.minutes??0;$('resSpeed').value=r.speed??0;$('resBoost').value=r.boost??0}
 function renderMaterials(){const w=$('materialRows');w.innerHTML='';data.materials.forEach((m,i)=>{w.insertAdjacentHTML('beforeend',`<div class="material-row"><div><label>素材名</label><input data-mi="${i}" data-k="name" value="${esc(m.name)}"><div id="ms${i}" class="material-status"></div></div><div><label>必要数</label><input type="number" min="0" data-mi="${i}" data-k="need" value="${m.need}"></div><div><label>所持数</label><input type="number" min="0" data-mi="${i}" data-k="have" value="${m.have}"></div></div>`)});w.querySelectorAll('input').forEach(x=>x.oninput=()=>{const i=+x.dataset.mi,k=x.dataset.k;data.materials[i][k]=k==='name'?x.value:+x.value;save();updateMaterialStatus(i)});data.materials.forEach((_,i)=>updateMaterialStatus(i))}function updateMaterialStatus(i){const m=data.materials[i],d=(+m.have)-(+m.need),s=$('ms'+i);s.textContent=d>=0?`充足（${d.toLocaleString()}余り）`:`不足 ${Math.abs(d).toLocaleString()}`;s.className='material-status '+(d>=0?'ok':'ng')}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}$('addMaterial').onclick=()=>{data.materials.push({name:'新しい素材',need:0,have:0});save();renderMaterials()};
@@ -280,6 +327,6 @@ $('saveGuide').onclick=()=>{data.guide=$('maintGuide').value;save();toast('ガ�
 document.querySelectorAll('.maintenance-nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.maintenance-nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.maint-pane').forEach(p=>p.classList.toggle('active',p.id===b.dataset.pane))});
 function unlock(){const p=$('adminPin').value.trim(),old=localStorage.getItem(PIN_KEY);if(!/^\d{4,}$/.test(p))return toast('4桁以上の数字を入力してください');if(!old){localStorage.setItem(PIN_KEY,p);toast('暗証番号を設定しました')}else if(old!==p)return toast('暗証番号が違います');$('lockPanel').classList.add('hidden');$('adminArea').classList.remove('hidden');renderMaintenance()}$('unlockAdmin').onclick=unlock;$('changePin').onclick=()=>{localStorage.removeItem(PIN_KEY);$('adminArea').classList.add('hidden');$('lockPanel').classList.remove('hidden');$('adminPin').value='';toast('新しい暗証番号を設定してください')};
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lunar-alliance-tools-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};$('importDataBtn').onclick=()=>$('importData').click();$('importData').onchange=async e=>{try{data=normalizeData(JSON.parse(await e.target.files[0].text()));save();renderNoticeEvents();renderMaterials();renderMaintenance();updateNoticeHints();updateSundayUI();updateNotice();toast('バックアップを復元しました')}catch{toast('読み込みに失敗しました')}};$('resetAll').onclick=()=>{if(confirm('すべての設定と個人データを初期化しますか？')){data=deep(defaults);save();location.reload()}};
-$('noticeDate').value=mmdd();$('resStart').value=dtLocal();renderHome();renderNoticeWeekdays();renderNoticeEvents();updateNoticeHints();updateSundayUI();updateNotice();loadResistanceInputs();renderMaterials();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+$('noticeDate').value=mmdd();$('resStart').value=dtLocal();renderHome();renderNoticeWeekdays();renderNoticeEvents();updateNoticeHints();updateSundayUI();updateNotice();loadResistanceInputs();renderMaterials();initTrainPlan();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
 </script>
 </body></html>
