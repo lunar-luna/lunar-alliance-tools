@@ -78,7 +78,7 @@ label{display:block;font-size:12px;font-weight:800;color:#3c4860;margin:10px 0 6
 <div id="toast" class="toast"></div>
 <script>
 const DAYS=["月","火","水","木","金","土","日"],STORE="lunarAllianceToolsV1",PIN_KEY="lunarAlliancePin";
-const defaults={train:{title:"★本日の列車★",time:"20:30",extra:""},trainTime:"★本日の列車★\n　車掌指名 20:30JST（19:30MYT、18:30WIB）",reasons:{月:{conductor:"連盟対決MVP1位",vip:"連盟対決MVP2位"},火:{conductor:"連盟対決1位",vip:"連盟対決4位"},水:{conductor:"アウォーズデー（Awards day）",vip:"アウォーズデー（Awards day）"},木:{conductor:"連盟対決2位",vip:"連盟対決5位"},金:{conductor:"寄付ランキング1位",vip:"寄付ランキング2位"},土:{conductor:"連盟対決3位",vip:"連盟対決6位"},日:{conductor:"全員参加サイコロ大会",vip:"全員参加サイコロ大会"}},
+const defaults={train:{title:"★本日の列車★",time:"22:00",extra:""},trainTime:"★本日の列車★\n　車掌指名 22:00JST（21:00MYT、20:00WIB）",reasons:{月:{conductor:"連盟対決MVP1位",vip:"連盟対決MVP2位"},火:{conductor:"連盟対決1位",vip:"連盟対決4位"},水:{conductor:"アウォーズデー（Awards day）",vip:"アウォーズデー（Awards day）"},木:{conductor:"連盟対決2位",vip:"連盟対決5位"},金:{conductor:"シーズン活躍1位",vip:"シーズン活躍2位"},土:{conductor:"連盟対決3位",vip:"連盟対決6位"},日:{conductor:"全員参加サイコロ大会",vip:"全員参加サイコロ大会"}},
 weekdays:{月:`【月曜日の連対 11:00JST～】
 ①APの消費　※軍拡
 ②レーダークエスト　クリア＆回収
@@ -223,7 +223,26 @@ events:[{id:"barrier",name:"バリア",times:["11:00"],fields:[],text:`☆バリ
 let data=load(),noticeState={day:jpDay(),selected:new Set(),fields:{}};
 function deep(o){return JSON.parse(JSON.stringify(o))}
 function parseTimesFromText(text){return [...String(text||'').matchAll(/(\d{1,2}:\d{2})JST/g)].map(m=>m[1])}
-function normalizeData(d){d.train=d.train||deep(defaults.train);if(!d.train.time){const m=String(d.trainTime||'').match(/(\d{1,2}:\d{2})JST/);d.train.time=m?m[1]:'20:30'}if(!d.train.title)d.train.title=(String(d.trainTime||'').split('\n')[0]||'★本日の列車★');if(d.train.extra==null)d.train.extra='';d.events=(d.events||deep(defaults.events)).map((e,i)=>({id:e.id||('event'+Date.now()+i),name:e.name||'イベント',times:Array.isArray(e.times)?e.times:parseTimesFromText(e.text),fields:Array.isArray(e.fields)?e.fields:[],text:e.text||`★${e.name||'イベント'}★`}));return d}
+function normalizeData(d){
+  d.train=d.train||deep(defaults.train);
+  if(!d.train.time){const m=String(d.trainTime||'').match(/(\d{1,2}:\d{2})JST/);d.train.time=m?m[1]:'22:00'}
+  // v4 migration: only the old default 20:30 is migrated to 22:00.
+  // Any other time explicitly chosen by the user is preserved.
+  if(d.train.time==='20:30')d.train.time='22:00';
+  if(typeof d.trainTime==='string'&&d.trainTime.includes('車掌指名 20:30JST')){
+    d.trainTime=d.trainTime.replace('車掌指名 20:30JST（19:30MYT、18:30WIB）','車掌指名 22:00JST（21:00MYT、20:00WIB）').replace('車掌指名 20:30JST','車掌指名 22:00JST');
+  }
+  if(!d.train.title)d.train.title=(String(d.trainTime||'').split('\n')[0]||'★本日の列車★');
+  if(d.train.extra==null)d.train.extra='';
+  d.reasons=d.reasons||deep(defaults.reasons);
+  // Migrate only the former Friday defaults; custom text is kept.
+  if(d.reasons['金']){
+    if(d.reasons['金'].conductor==='寄付ランキング1位')d.reasons['金'].conductor='シーズン活躍1位';
+    if(d.reasons['金'].vip==='寄付ランキング2位')d.reasons['金'].vip='シーズン活躍2位';
+  }
+  d.events=(d.events||deep(defaults.events)).map((e,i)=>({id:e.id||('event'+Date.now()+i),name:e.name||'イベント',times:Array.isArray(e.times)?e.times:parseTimesFromText(e.text),fields:Array.isArray(e.fields)?e.fields:[],text:e.text||`★${e.name||'イベント'}★`}));
+  return d
+}
 function load(){try{const saved=JSON.parse(localStorage.getItem(STORE)||"null");return normalizeData(saved?Object.assign(deep(defaults),saved):deep(defaults))}catch{return normalizeData(deep(defaults))}}
 function save(){localStorage.setItem(STORE,JSON.stringify(data))}function $(id){return document.getElementById(id)}function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
 function jpDay(d=new Date()){return DAYS[(d.getDay()+6)%7]}function mmdd(d=new Date()){return String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")}function dtLocal(d=new Date()){const z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
@@ -233,7 +252,7 @@ function replaceEventTimes(text,times){let i=0;return String(text||'').split('\n
 function buildTrainBase(){const t=data.train||defaults.train;const lines=[t.title||'★本日の列車★'];if(t.time)lines.push(`　車掌指名 ${timeLine(t.time)}`);if((t.extra||'').trim())lines.push(t.extra.trim());return lines}
 function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));$('backBtn').style.display=id==='home'?'none':'block';$('appSubtitle').textContent=id==='home'?'連盟活動を、もっと便利に。':({notice:'お知らせ作成',resistance:'耐性計算',events:'イベント一覧',train:'車掌・VIP',guide:'連盟ガイド',maintenance:'メンテナンス'}[id]||'');scrollTo(0,0);if(id==='home')renderHome();if(id==='events')renderEventTimes();if(id==='train')renderTrain();if(id==='guide')$('guideText').textContent=data.guide}
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$('backBtn').onclick=()=>go('home');
-function renderHome(){const now=new Date();$('todayLabel').textContent=`📅 ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}（${jpDay(now)}）`;$('todaySummary').innerHTML=`${esc((data.train&&data.train.time)||'20:30')}　車掌指名<br>今日の連対：${jpDay(now)}曜日テンプレート<br><span style="color:#66748f">詳しい予定は「イベント一覧」または「お知らせ作成」で確認</span>`}
+function renderHome(){const now=new Date();$('todayLabel').textContent=`📅 ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}（${jpDay(now)}）`;$('todaySummary').innerHTML=`${esc((data.train&&data.train.time)||'22:00')}　車掌指名<br>今日の連対：${jpDay(now)}曜日テンプレート<br><span style="color:#66748f">詳しい予定は「イベント一覧」または「お知らせ作成」で確認</span>`}
 function renderNoticeWeekdays(){const r=$('noticeWeekdays');r.innerHTML='';DAYS.forEach(d=>r.insertAdjacentHTML('beforeend',`<input type="radio" name="nd" id="nd${d}" value="${d}" ${d===noticeState.day?'checked':''}><label for="nd${d}">${d}</label>`));r.querySelectorAll('input').forEach(x=>x.onchange=()=>{noticeState.day=x.value;updateNoticeHints();updateSundayUI();updateNotice()})}
 function renderNoticeEvents(){const c=$('eventChecks'),details=$('eventDetails');c.innerHTML='';details.innerHTML='';data.events.forEach(e=>{c.insertAdjacentHTML('beforeend',`<div class="event-check"><input type="checkbox" id="ev${e.id}" data-id="${e.id}"><label for="ev${e.id}">${e.name}</label></div>`);if(e.fields.length){let h=`<div id="detail${e.id}" class="event-detail"><h3>${e.name}</h3>`;e.fields.forEach(f=>{const l=f==='level'?'レベル':f==='server'?'対戦サーバー番号':'備考',p=f==='level'?'12':f==='server'?'1738':'ポイントが貯まったら';h+=`<label>${l}</label><input data-event="${e.id}" data-field="${f}" placeholder="${p}">`});details.insertAdjacentHTML('beforeend',h+'</div>')}});c.querySelectorAll('input').forEach(x=>x.onchange=()=>{x.checked?noticeState.selected.add(x.dataset.id):noticeState.selected.delete(x.dataset.id);$('detail'+x.dataset.id)?.classList.toggle('show',x.checked);updateNotice()});details.querySelectorAll('input').forEach(x=>x.oninput=()=>{noticeState.fields[x.dataset.event]??={};noticeState.fields[x.dataset.event][x.dataset.field]=x.value;updateNotice()})}
 function updateNoticeHints(){const r=data.reasons[noticeState.day]||{conductor:'',vip:''};$('conductorHint').textContent=r.conductor;$('vipHint').textContent=r.vip}
@@ -250,13 +269,13 @@ function renderMaintenance(){const ds=$('maintDay');ds.innerHTML=DAYS.map(d=>`<o
 function refreshMaintEventSelect(selected){const es=$('maintEvent');es.innerHTML=data.events.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');if(selected&&data.events.some(e=>e.id===selected))es.value=selected}
 function loadDayMaint(){const d=$('maintDay').value||'月';$('maintDayText').value=data.weekdays[d]||'';$('maintConductor').value=(data.reasons[d]||{}).conductor||'';$('maintVip').value=(data.reasons[d]||{}).vip||''}
 function loadEventMaint(){creatingEvent=false;const e=data.events.find(e=>e.id===($('maintEvent').value||data.events[0]?.id));if(!e){$('maintEventName').value='';$('maintEventTimes').value='';$('maintEventText').value='';return}$('maintEventName').value=e.name;$('maintEventTimes').value=(e.times||[]).join(', ');$('maintEventText').value=e.text;$('fieldLevel').checked=e.fields.includes('level');$('fieldServer').checked=e.fields.includes('server');$('fieldNote').checked=e.fields.includes('note')}
-function loadTrainMaint(){const t=data.train||defaults.train;$('maintTrainTitle').value=t.title||'';$('maintTrainTime').value=t.time||'20:30';$('maintTrainExtra').value=t.extra||''}
+function loadTrainMaint(){const t=data.train||defaults.train;$('maintTrainTitle').value=t.title||'';$('maintTrainTime').value=t.time||'22:00';$('maintTrainExtra').value=t.extra||''}
 $('maintDay').onchange=loadDayMaint;$('maintEvent').onchange=loadEventMaint;
 $('saveDay').onclick=()=>{const d=$('maintDay').value;data.weekdays[d]=$('maintDayText').value;data.reasons[d]={conductor:$('maintConductor').value,vip:$('maintVip').value};save();updateNoticeHints();updateNotice();toast('曜日設定を保存しました')};
 $('newEvent').onclick=()=>{creatingEvent=true;$('maintEventName').value='';$('maintEventTimes').value='';$('maintEventText').value='';$('fieldLevel').checked=$('fieldServer').checked=$('fieldNote').checked=false;$('maintEventName').focus();toast('新しいイベントを入力してください')};
 $('saveEvent').onclick=()=>{const name=$('maintEventName').value.trim();if(!name)return toast('イベント名を入力してください');const times=$('maintEventTimes').value.split(/[,、]/).map(x=>x.trim()).filter(Boolean);if(times.some(t=>!/^\d{1,2}:\d{2}$/.test(t)))return toast('時間は 21:30 の形式で入力してください');const fields=[];if($('fieldLevel').checked)fields.push('level');if($('fieldServer').checked)fields.push('server');if($('fieldNote').checked)fields.push('note');let text=$('maintEventText').value.trim();if(!text){text=`★${name}★`+(times[0]?`\n　${timeLine(times[0])}`:'')}if(creatingEvent){const id='custom'+Date.now();data.events.push({id,name,times,fields,text});creatingEvent=false;refreshMaintEventSelect(id)}else{const e=data.events.find(e=>e.id===$('maintEvent').value);if(!e)return;e.name=name;e.times=times;e.fields=fields;e.text=text;refreshMaintEventSelect(e.id)}save();renderNoticeEvents();renderEventTimes();updateNotice();loadEventMaint();toast('イベント設定を保存しました')};
 $('deleteEvent').onclick=()=>{if(creatingEvent){loadEventMaint();return}const id=$('maintEvent').value,e=data.events.find(x=>x.id===id);if(!e)return;if(!confirm(`「${e.name}」を削除しますか？`))return;data.events=data.events.filter(x=>x.id!==id);noticeState.selected.delete(id);delete noticeState.fields[id];save();refreshMaintEventSelect();renderNoticeEvents();renderEventTimes();loadEventMaint();updateNotice();toast('イベントを削除しました')};
-$('saveTrain').onclick=()=>{data.train={title:$('maintTrainTitle').value.trim()||'★本日の列車★',time:$('maintTrainTime').value||'20:30',extra:$('maintTrainExtra').value};save();updateNotice();renderHome();toast('列車設定を保存しました')};
+$('saveTrain').onclick=()=>{data.train={title:$('maintTrainTitle').value.trim()||'★本日の列車★',time:$('maintTrainTime').value||'22:00',extra:$('maintTrainExtra').value};save();updateNotice();renderHome();toast('列車設定を保存しました')};
 $('saveGuide').onclick=()=>{data.guide=$('maintGuide').value;save();toast('ガイドを保存しました')};
 document.querySelectorAll('.maintenance-nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.maintenance-nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.maint-pane').forEach(p=>p.classList.toggle('active',p.id===b.dataset.pane))});
 function unlock(){const p=$('adminPin').value.trim(),old=localStorage.getItem(PIN_KEY);if(!/^\d{4,}$/.test(p))return toast('4桁以上の数字を入力してください');if(!old){localStorage.setItem(PIN_KEY,p);toast('暗証番号を設定しました')}else if(old!==p)return toast('暗証番号が違います');$('lockPanel').classList.add('hidden');$('adminArea').classList.remove('hidden');renderMaintenance()}$('unlockAdmin').onclick=unlock;$('changePin').onclick=()=>{localStorage.removeItem(PIN_KEY);$('adminArea').classList.add('hidden');$('lockPanel').classList.remove('hidden');$('adminPin').value='';toast('新しい暗証番号を設定してください')};
