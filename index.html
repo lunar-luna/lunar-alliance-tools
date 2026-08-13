@@ -74,11 +74,13 @@ label{display:block;font-size:12px;font-weight:800;color:#3c4860;margin:10px 0 6
    <div><label>4位</label><input id="planVs4"></div><div><label>5位</label><input id="planVs5"></div><div><label>6位</label><input id="planVs6"></div>
   </div>
  </div>
- <div class="card"><h2>水曜｜Awards day</h2>
+ <div class="card"><div class="section-title"><h2>水曜｜Awards day</h2><span class="badge">あとから決めてもOK</span></div>
+  <p class="notice">名前が空欄なら「未定」で作成します。決まったら名前と理由を追加入力できます。</p>
   <div class="grid2"><div><label>車掌</label><input id="planAwardsC" placeholder="名前（敬称略）"><label>理由</label><input id="planAwardsCR" placeholder="例：ゴールデンハンター"></div><div><label>VIP</label><input id="planAwardsV" placeholder="名前（敬称略）"><label>理由</label><input id="planAwardsVR" placeholder="例：演習ダメージ1位"></div></div>
  </div>
- <div class="card"><h2>金曜｜シーズン活躍</h2>
-  <div class="grid2"><div><label>1位／車掌</label><input id="planSeason1" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason1R" placeholder="例：領地進行段取り"></div><div><label>2位／VIP</label><input id="planSeason2" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason2R" placeholder="選出理由"></div></div>
+ <div class="card"><div class="section-title"><h2>金曜｜シーズン活躍</h2><span class="badge">あとから決めてもOK</span></div>
+  <p class="notice">名前が空欄なら「未定」で作成します。決まったら名前と理由を追加入力できます。</p>
+  <div class="grid2"><div><label>車掌</label><input id="planSeason1" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason1R" placeholder="例：領地進行段取り"></div><div><label>VIP</label><input id="planSeason2" placeholder="名前（敬称略）"><label>理由</label><input id="planSeason2R" placeholder="選出理由"></div></div>
  </div>
  <div id="planDupWarning" class="card hidden" style="border-color:#f0c36a;background:#fffaf0"></div>
  <div class="card"><h2>作成結果</h2><div id="planPreview" class="preview"></div><div class="actions"><button id="copyPlan" class="btn primary">テキストをコピー</button><button id="clearPlan" class="btn secondary">入力をクリア</button></div></div>
@@ -294,16 +296,16 @@ function planAssignments(){return [
  {day:'月',role:'VIP',name:planName('planMvp2'),label:'連盟スターMVP2位'},
  {day:'火',role:'車掌',name:planName('planVs1'),label:'連盟対決1位'},
  {day:'火',role:'VIP',name:planName('planVs4'),label:'連盟対決4位'},
- {day:'水',role:'車掌',name:planName('planAwardsC'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsCR')},
- {day:'水',role:'VIP',name:planName('planAwardsV'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsVR')},
+ {day:'水',role:'車掌',name:planName('planAwardsC'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsCR'),allowPending:true},
+ {day:'水',role:'VIP',name:planName('planAwardsV'),label:'アウォーズデー（Awards day）',reason:planName('planAwardsVR'),allowPending:true},
  {day:'木',role:'車掌',name:planName('planVs2'),label:'連盟対決2位'},
  {day:'木',role:'VIP',name:planName('planVs5'),label:'連盟対決5位'},
- {day:'金',role:'車掌',name:planName('planSeason1'),label:'シーズン活躍1位',reason:planName('planSeason1R')},
- {day:'金',role:'VIP',name:planName('planSeason2'),label:'シーズン活躍2位',reason:planName('planSeason2R')},
+ {day:'金',role:'車掌',name:planName('planSeason1'),label:'シーズン活躍',reason:planName('planSeason1R'),allowPending:true},
+ {day:'金',role:'VIP',name:planName('planSeason2'),label:'シーズン活躍',reason:planName('planSeason2R'),allowPending:true},
  {day:'土',role:'車掌',name:planName('planVs3'),label:'連盟対決3位'},
  {day:'土',role:'VIP',name:planName('planVs6'),label:'連盟対決6位'}
 ]}
-function buildTrainPlan(){const a=planAssignments(),{start,end}=planDates();const by=(role,day)=>a.find(x=>x.role===role&&x.day===day);const line=x=>x&&x.name?`${x.day}：${x.label} → ${withReason(x.name,x.reason)}`:`${x.day}：${x.label} → `;const c=['月','火','水','木','金','土'].map(d=>line(by('車掌',d)));c.push('日：全員参加サイコロ🎲大会');const v=['月','火','水','木','金','土'].map(d=>line(by('VIP',d)));v.push('日：全員参加サイコロ🎲大会');return `車掌案${start}-${end}\n【車掌】\n${c.join('\n')}\n【VIP】\n${v.join('\n')}`}
+function buildTrainPlan(){const a=planAssignments(),{start,end}=planDates();const by=(role,day)=>a.find(x=>x.role===role&&x.day===day);const line=x=>x&&x.name?`${x.day}：${x.label} → ${withReason(x.name,x.reason)}`:`${x.day}：${x.label} → ${x&&x.allowPending?'未定':''}`;const c=['月','火','水','木','金','土'].map(d=>line(by('車掌',d)));c.push('日：全員参加サイコロ🎲大会');const v=['月','火','水','木','金','土'].map(d=>line(by('VIP',d)));v.push('日：全員参加サイコロ🎲大会');return `車掌案${start}-${end}\n【車掌】\n${c.join('\n')}\n【VIP】\n${v.join('\n')}`}
 function updatePlanDup(){const counts={};planAssignments().forEach(x=>{if(x.name)counts[x.name]=(counts[x.name]||0)+1});const over=Object.entries(counts).filter(([,n])=>n>=3).sort((a,b)=>b[1]-a[1]);const w=$('planDupWarning');if(!over.length){w.classList.add('hidden');w.innerHTML='';return}w.classList.remove('hidden');w.innerHTML=`<b style="color:#9a6114">⚠️ 重複チェック</b><div class="notice" style="margin-top:7px;color:#7c5719">${over.map(([n,c])=>`${esc(n)}さん：週${c}回`).join('<br>')}<br>同じ人は週2回までのため、担当を確認してください。</div>`}
 function updateTrainPlan(){if(!$('planPreview'))return;$('planPreview').textContent=buildTrainPlan();updatePlanDup()}
 function initTrainPlan(){if(!$('planWeek'))return;if(!$('planWeek').value)$('planWeek').value=nextMondayISO();PLAN_IDS.forEach(id=>$(id).addEventListener('input',updateTrainPlan));$('planWeek').addEventListener('change',updateTrainPlan);$('copyPlan').onclick=async()=>{const text=buildTrainPlan();try{await navigator.clipboard.writeText(text)}catch{const t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('車掌案をコピーしました')};$('clearPlan').onclick=()=>{PLAN_IDS.forEach(id=>$(id).value='');updateTrainPlan();toast('入力をクリアしました')};updateTrainPlan()}
